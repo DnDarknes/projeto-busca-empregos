@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IApplication extends Document {
-  userId: mongoose.Types.ObjectId; // Referência ao usuário
-  jobId: mongoose.Types.ObjectId; // Referência à vaga
+  userId: mongoose.Types.ObjectId;
+  jobId: mongoose.Types.ObjectId; 
   date: Date;
   resume: string;
   status: string; 

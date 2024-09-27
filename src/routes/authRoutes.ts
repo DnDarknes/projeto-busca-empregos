@@ -20,3 +20,6 @@ router.patch('/profile', authMiddleware, patchProfile);
 router.delete('/profile/:id',checkUserApplicationsMiddleware, authMiddleware, deleteProfile);
 
 export default router;
+
+
+//Rotas feitas por bruno

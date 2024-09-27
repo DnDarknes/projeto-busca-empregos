@@ -13,3 +13,6 @@ router.patch("/:id",authMiddleware, patchJob);
 router.delete("/:id",authMiddleware, checkJobApplicationsMiddleware, deleteJob);
 
 export default router;
+
+
+//rotas feitas por debora

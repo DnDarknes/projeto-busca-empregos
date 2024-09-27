@@ -12,3 +12,6 @@ router.put('/applications/:applicationId/status', authMiddleware, updateApplicat
 router.delete('/applications/:applicationId', authMiddleware, deleteApplication);
 
 export default router;
+
+
+//Rotas feitas por bruno
