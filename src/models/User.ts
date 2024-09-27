@@ -3,7 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IUser extends Document {
   name: string;
   email: string;
-  password: string; // Não deve ser retornado nas respostas
+  password: string; 
 }
 
 const userSchema = new Schema<IUser>({

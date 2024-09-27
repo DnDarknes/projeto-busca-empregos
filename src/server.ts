@@ -24,7 +24,7 @@ mongoose
   .catch((error) => {
     console.error("Erro ao conectar ao MongoDB Atlas:", error.message);
   });
-// Middleware
+  
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

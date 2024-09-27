@@ -9,7 +9,7 @@ export interface IApplication extends Document {
 }
 
 const applicationSchema = new Schema<IApplication>({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }, // Verifique se "User" é o nome exato do modelo
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   jobId: { type: Schema.Types.ObjectId, ref: 'Job', required: true },
   date: { type: Date, default: Date.now },
   resume: { type: String }, 

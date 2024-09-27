@@ -12,7 +12,7 @@ export const register = async (req: Request, res: Response) => {
     const newUser = new User({ name, email, password: hashedPassword });
     await newUser.save();
     return res.status(201).json({ message: 'Usuário registrado com sucesso' });
-  } catch (error: any) { // Modificação aqui
+  } catch (error: any) {
     console.error(error);
     return res.status(500).json({ message: 'Erro ao registrar usuário', error: error.message || 'Erro desconhecido' });
   }
@@ -35,7 +35,7 @@ export const login = async (req: Request, res: Response) => {
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET as string, { expiresIn: '1h' });
     return res.status(200).json({ token });
-  } catch (error: any) { // Modificação aqui
+  } catch (error: any) {
     console.error(error);
     return res.status(500).json({ message: 'Erro ao logar', error: error.message || 'Erro desconhecido' });
   }
@@ -52,7 +52,7 @@ export const getProfile = async (req: Request, res: Response) => {
     }
 
     return res.status(200).json(user);
-  } catch (error: any) { // Modificação aqui
+  } catch (error: any) {
     console.error(error);
     return res.status(500).json({ message: 'Erro ao obter perfil', error: error.message || 'Erro desconhecido' });
   }
@@ -70,7 +70,7 @@ export const updateProfile = async (req: Request, res: Response) => {
     }
 
     return res.status(200).json(updatedUser);
-  } catch (error: any) { // Modificação aqui
+  } catch (error: any) {
     console.error(error);
     return res.status(500).json({ message: 'Erro ao atualizar perfil', error: error.message || 'Erro desconhecido' });
   }
@@ -88,7 +88,7 @@ export const patchProfile = async (req: Request, res: Response) => {
     }
 
     return res.status(200).json(updatedUser);
-  } catch (error: any) { // Modificação aqui
+  } catch (error: any) { 
     console.error(error);
     return res.status(500).json({ message: 'Erro ao atualizar perfil', error: error.message || 'Erro desconhecido' });
   }
