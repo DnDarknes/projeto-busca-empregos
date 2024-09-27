@@ -1,18 +1,41 @@
 import { Request, Response } from 'express';
+import * as Yup from 'yup';
 import User from '../models/User';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-// Registrar Usuário
+const userSchema = Yup.object().shape({
+  name: Yup.string().required('Nome é obrigatório'),
+  email: Yup.string()
+    .email('Email inválido')
+    .required('Email é obrigatório'),
+  password: Yup.string()
+    .min(6, 'A senha deve ter pelo menos 6 caracteres')
+    .required('Senha é obrigatória'),
+});
+
+// registro de Usuário
 export const register = async (req: Request, res: Response) => {
   try {
+    
+    await userSchema.validate(req.body);
+
     const { name, email, password } = req.body;
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email já está em uso' });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({ name, email, password: hashedPassword });
     await newUser.save();
     return res.status(201).json({ message: 'Usuário registrado com sucesso' });
   } catch (error: any) {
+    if (error instanceof Yup.ValidationError) {
+      return res.status(400).json({ message: 'Erro de validação', errors: error.errors });
+    }
+
     console.error(error);
     return res.status(500).json({ message: 'Erro ao registrar usuário', error: error.message || 'Erro desconhecido' });
   }
