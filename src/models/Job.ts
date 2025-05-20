@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface IJob extends Document {
   title: string;
@@ -7,8 +7,13 @@ export interface IJob extends Document {
   location: {
     type: string;
     coordinates: number[];
+    city: string;
+    state: string;
   };
+  createdBy: Types.ObjectId;
+  accessibilitySupport: string[];
 }
+
 
 const jobSchema = new Schema<IJob>({
   title: { type: String, required: true },
@@ -17,13 +22,25 @@ const jobSchema = new Schema<IJob>({
   location: {
     type: {
       type: String,
-      enum: ["Point"],
+      enum: ['Point'],
       required: true
     },
-    coordinates: { type: [Number], required: true }
+    coordinates: { type: [Number], required: true },
+    city: { type: String, required: true },
+    state: { type: String, required: true }
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  accessibilitySupport: {
+    type: [String],
+    enum: ['visual', 'auditiva', 'fisica', 'intelectual', 'multipla', 'outra'],
+    default: []
   }
 });
 
-jobSchema.index({ location: "2dsphere" }); // Adiciona índice geoespacial
+jobSchema.index({ 'location': '2dsphere' });
 
-export default mongoose.model<IJob>("Job", jobSchema);
+export default mongoose.model<IJob>('Job', jobSchema);

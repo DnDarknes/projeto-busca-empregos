@@ -6,21 +6,22 @@ import jwt from 'jsonwebtoken';
 
 const userSchema = Yup.object().shape({
   name: Yup.string().required('Nome é obrigatório'),
-  email: Yup.string()
-    .email('Email inválido')
-    .required('Email é obrigatório'),
-  password: Yup.string()
-    .min(6, 'A senha deve ter pelo menos 6 caracteres')
-    .required('Senha é obrigatória'),
+  email: Yup.string().email('Email inválido').required('Email é obrigatório'),
+  password: Yup.string().min(6, 'A senha deve ter pelo menos 6 caracteres').required('Senha é obrigatória'),
+  role: Yup.string().oneOf(['admin', 'recrutador', 'usuario'], 'Tipo de usuário inválido').optional()
 });
 
-// registro de Usuário
+// registro de Usuário ou Recrutador
 export const register = async (req: Request, res: Response) => {
   try {
-    
     await userSchema.validate(req.body);
 
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
+
+    if (role === 'admin') {
+      return res.status(403).json({ message: 'Não é permitido criar um usuário com papel de admin por esta rota' });
+    }
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'Email já está em uso' });
@@ -28,8 +29,9 @@ export const register = async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = new User({ name, email, password: hashedPassword });
+    const newUser = new User({ name, email, password: hashedPassword, role });
     await newUser.save();
+
     return res.status(201).json({ message: 'Usuário registrado com sucesso' });
   } catch (error: any) {
     if (error instanceof Yup.ValidationError) {
@@ -41,6 +43,32 @@ export const register = async (req: Request, res: Response) => {
   }
 };
 
+// registro de Admin
+export const registerAdmin = async (req: Request, res: Response) => {
+  try {
+    const { name, email, password } = req.body;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email já está em uso' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const admin = new User({
+      name,
+      email,
+      password: hashedPassword,
+      role: 'admin',
+    });
+
+    await admin.save();
+
+    res.status(201).json({ message: 'Administrador criado com sucesso', userId: admin._id });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Erro ao registrar administrador', error: error.message });
+  }
+}
 // Login de Usuário
 export const login = async (req: Request, res: Response) => {
   try {
@@ -56,8 +84,13 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Senha incorreta' });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET as string, { expiresIn: '1h' });
-    return res.status(200).json({ token });
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET as string,
+      { expiresIn: '1h' }
+    );
+
+    return res.status(200).json({ token, role: user.role });
   } catch (error: any) {
     console.error(error);
     return res.status(500).json({ message: 'Erro ao logar', error: error.message || 'Erro desconhecido' });
@@ -84,8 +117,16 @@ export const getProfile = async (req: Request, res: Response) => {
 // Atualizar Perfil de Usuário
 export const updateProfile = async (req: Request, res: Response) => {
   try {
-    const userId = req.userId;
+    const userId = req.params.id;
     const updates = req.body;
+    
+    if ('role' in updates) {
+      delete updates.role;
+    }
+
+    if (updates.password) {
+      updates.password = await bcrypt.hash(updates.password, 10);
+    }
 
     const updatedUser = await User.findByIdAndUpdate(userId, updates, { new: true }).select('-password');
     if (!updatedUser) {
@@ -102,8 +143,16 @@ export const updateProfile = async (req: Request, res: Response) => {
 // Atualizar Perfil Parcialmente
 export const patchProfile = async (req: Request, res: Response) => {
   try {
-    const userId = req.userId;
+    const userId = req.params.id;
     const updates = req.body;
+    
+    if ('role' in updates) {
+      delete updates.role;
+    }
+
+    if (updates.password) {
+      updates.password = await bcrypt.hash(updates.password, 10);
+    }
 
     const updatedUser = await User.findByIdAndUpdate(userId, updates, { new: true }).select('-password');
     if (!updatedUser) {
@@ -120,8 +169,12 @@ export const patchProfile = async (req: Request, res: Response) => {
 // Excluir Perfil de Usuário
 export const deleteProfile = async (req: Request, res: Response) => {
   try {
-    // Obtém o ID do usuário a partir dos parâmetros da URL
     const userId = req.params.id;
+    const loggedUserId = req.userId;
+
+    if (userId !== loggedUserId && (req as any).userRole !== 'admin') {
+      return res.status(403).json({ message: 'Você não tem permissão para excluir este perfil' });
+    }
 
     const deletedUser = await User.findByIdAndDelete(userId);
     if (!deletedUser) {
@@ -134,4 +187,3 @@ export const deleteProfile = async (req: Request, res: Response) => {
     return res.status(500).json({ message: 'Erro ao deletar usuário', error: error.message || 'Erro desconhecido' });
   }
 };
-

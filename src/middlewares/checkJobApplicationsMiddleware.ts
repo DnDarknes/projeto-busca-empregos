@@ -5,8 +5,7 @@ import Application from "../models/Application";
 const checkJobApplicationsMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-
-    // Verificar se existem candidaturas associadas à vaga
+    
     const hasApplications = await Application.exists({ jobId: id });
 
     if (hasApplications) {
