@@ -11,7 +11,7 @@ const userSchema = Yup.object().shape({
   role: Yup.string().oneOf(['admin', 'recrutador', 'usuario'], 'Tipo de usuário inválido').optional()
 });
 
-// registro de Usuário ou Recrutador
+
 export const register = async (req: Request, res: Response) => {
   try {
     await userSchema.validate(req.body);
@@ -43,7 +43,7 @@ export const register = async (req: Request, res: Response) => {
   }
 };
 
-// registro de Admin
+
 export const registerAdmin = async (req: Request, res: Response) => {
   try {
     const { name, email, password } = req.body;
@@ -69,7 +69,7 @@ export const registerAdmin = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Erro ao registrar administrador', error: error.message });
   }
 }
-// Login de Usuário
+
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
@@ -97,7 +97,7 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-// Obter Perfil de Usuário
+
 export const getProfile = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
@@ -114,7 +114,7 @@ export const getProfile = async (req: Request, res: Response) => {
   }
 };
 
-// Atualizar Perfil de Usuário
+
 export const updateProfile = async (req: Request, res: Response) => {
   try {
     const userId = req.params.id;
@@ -140,7 +140,7 @@ export const updateProfile = async (req: Request, res: Response) => {
   }
 };
 
-// Atualizar Perfil Parcialmente
+
 export const patchProfile = async (req: Request, res: Response) => {
   try {
     const userId = req.params.id;
@@ -166,7 +166,7 @@ export const patchProfile = async (req: Request, res: Response) => {
   }
 };
 
-// Excluir Perfil de Usuário
+
 export const deleteProfile = async (req: Request, res: Response) => {
   try {
     const userId = req.params.id;
